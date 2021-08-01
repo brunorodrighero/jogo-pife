@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo Pife</title>
+    <link rel="stylesheet" type="text/css" href="/styles.css">
+    <script src="/index.js" defer></script>
+</head>
+<body>
+    <div id="titulo">Jogo Pife!</div>
+    <div class="logo">
+        <img id="logo" src="/imagens/aces.png" alt="Imagens Cartas">
+    </div>
+    <div class="imagens">
+        <img id="deck-cartas" onclick="novaCarta()" src="/imagens/deckofcards.png" alt="Deck de Cartas">
+    </div>
+    <div id="jogador-cpu">Cartas CPU: </div>
+    <div id="jogador-humano">Cartas Humano:</div>
+    <div id="quem-joga"></div>
+    <div class="botoes">
+        <button onclick="novaCarta()">Nova Carta</button>
+        <button onclick="terminarJogada()">Terminar Jogada</button>
+        <button onclick="novoJogo()">Novo Jogo</button>
+    </div>
+    
+    
+</body>
+</html>
