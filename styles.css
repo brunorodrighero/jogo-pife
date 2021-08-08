@@ -52,35 +52,6 @@ button:hover {
   max-width: 30%;
 }
 
-#deck-cartas {
-  max-width: 15%;
-  cursor: pointer;
-}
-
-.carta-retirada {
-  max-width: 13%;
-  cursor: pointer;
-}
-
-#quem-joga {
-  text-align: center;
-  color: white;
-  font-size: 2vw;
-  font-family: Operator Mono, Menlo, Monaco, 'Courier New', monospace;
-  font-weight: bold;
-  margin-bottom: 20px;
-}
-
-.jogador-cpu, .jogador-humano {
-  max-width: 10%;
-}
-
-#jogador-cpu, #jogador-humano {
-  font-family: Operator Mono, Menlo, Monaco, 'Courier New', monospace;
-  color: white;
-  font-size: 2vw;
-}
-
 .imagens, .logo {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -89,5 +60,55 @@ button:hover {
       -ms-flex-pack: center;
           justify-content: center;
   margin-bottom: 30px;
+}
+
+#deck-cartas {
+  max-width: 15%;
+  cursor: pointer;
+}
+
+#quem-joga {
+  display: inline-block;
+  text-align: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  color: white;
+  font-size: 2vw;
+  font-family: Operator Mono, Menlo, Monaco, 'Courier New', monospace;
+  font-weight: bold;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+#mao-humano, #mao-cpu {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+}
+
+#mao-humano img, #mao-cpu img {
+  width: 100px;
+  height: 150px;
+  margin: 5px;
+}
+
+.carta-retirada {
+  max-width: 13%;
+  cursor: pointer;
+}
+
+#jogador-cpu, #jogador-humano {
+  display: inline-block;
+  font-family: Operator Mono, Menlo, Monaco, 'Courier New', monospace;
+  color: white;
+  font-size: 2vw;
+  width: 100%;
 }
 /*# sourceMappingURL=styles.css.map */

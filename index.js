@@ -125,13 +125,13 @@ function novaCarta() {
   if (cartaRetirada == undefined) return;
   removeCartaRetirada();
   if (!vezCPU && podeVirarCartaHumano) {
-    criarCartaRetirada();
+    criarCartaRetirada(cartaRetirada);
     podeVirarCartaHumano = false;
     virouCartaHumano = true;
     virouCartaCPU = false;
   }
   if (vezCPU && podeVirarCartaCPU) {
-    criarCartaRetirada();
+    criarCartaRetirada(cartaRetirada);
     podeVirarCartaCPU = false;
     virouCartaCPU = true;
     virouCartaHumano = false;
@@ -152,30 +152,34 @@ function criarCartaRetirada(cartaRetirada) {
 function aceitarCarta(idCarta) {
   if (!isPlaying) return;
   if (cartaRetirada == undefined) return;
-  if (maoHumano != 9 || maoCPU != 9) return;
-  adicionarCartaMao(vezCPU, idCarta);
+  if (maoHumano > 9 || maoCPU > 9) return;
+  adicionarCartaMao(idCarta);
+  removeCartaRetirada();
 }
 
-function adicionarCartaMao(quemJoga, idCarta) {
-  if (quemJoga == undefined) return;
-  let carta, local;
+function adicionarCartaMao(idCarta) {
+  if (idCarta == undefined) return;
+  let carta;
+  let local;
   carta = document.querySelector(".carta-retirada");
   carta.removeAttribute("class", "carta-retirada");
-  carta.setAttribute("class", "jogador-cpu");
   carta.removeAttribute("onClick", `aceitarCarta('${idCarta}')`);
   carta.setAttribute("onClick", `devolverCarta('${idCarta}')`);
 
-  if (quemJoga == true) {
-    local = document.querySelector("#jogador-cpu");
+  if (vezCPU == true) {
+    carta.setAttribute("class", "jogador-cpu");
+    local = document.querySelector("#mao-cpu");
     local.appendChild(carta);
     maoCPU.push(idCarta);
     virouCartaCPU = true;
   } else {
-    local = document.querySelector("#jogador-humano");
+    carta.setAttribute("class", "jogador-humano");
+    local = document.querySelector("#mao-humano");
     local.appendChild(carta);
     maoHumano.push(idCarta);
     virouCartaHumano = true;
   }
+  
 }
 
 function removeCartaRetirada() {
@@ -201,31 +205,40 @@ function vezDeQuem() {
 
 function darAsCartas() {
   maoCPU.forEach((e) => {
+    //let container = document.createElement("div");
+    //container.setAttribute("class", "container");
     let img = document.createElement("img");
     img.setAttribute("class", "jogador-cpu");
     img.setAttribute("id", `${e}`);
     img.setAttribute("draggable", true);
     img.setAttribute("onClick", `devolverCarta('${e}')`);
     img.src = `/imagens/${e}.png`;
-    let local = document.querySelector("#jogador-cpu");
+    let local = document.querySelector("#mao-cpu");
+    //container.appendChild(img);
+    //local.parentNode.insertBefore(container, local.nextSibling);   
     local.appendChild(img);
+    //local.appendChild(container);
   });
 
   maoHumano.forEach((e) => {
+    //let container = document.createElement("div");
+    //container.setAttribute("class", "container2");
     let img = document.createElement("img");
     img.setAttribute("class", "jogador-humano");
     img.setAttribute("id", `${e}`);
     img.setAttribute("draggable", true);
     img.setAttribute("onClick", `devolverCarta('${e}')`);
     img.src = `/imagens/${e}.png`;
-    let local = document.querySelector("#jogador-humano");
+    let local = document.querySelector("#mao-humano");
+    //container.appendChild(img);
+    //local.parentNode.insertBefore(container, local.nextSibling); 
     local.appendChild(img);
   });
 }
 
 function devolverCarta(idCarta) {
   if (!isPlaying) return;
-  if (maoHumano != 10 || maoCPU != 10) return;
+  if (!vezCPU && maoHumano.length != 10 || vezCPU && maoCPU.length != 10) return;
   let carta = idCarta.replace("'", "");
   let cartaImg = document.querySelectorAll(`img[src='/imagens/${carta}.png']`);
   let local = document.querySelector(".imagens");
@@ -387,4 +400,32 @@ function verificaRepeticoesArray(vetor, valor) {
   let contador = 0;
   vetor.forEach((v) => v.charAt(0) == valor && contador++);
   return contador;
+}
+//fazendo a verificação de vitória quando são cartas sequenciais do mesmo naipe.
+function verificaSequenciasArray(vetor, valor){
+  let contador = 0;
+  let naipe=valor.charAt(1);
+  vetor.forEach((v) => v.charAt(0) == valor && contador++);
+  return contador;
+}
+
+const dragMaoHumano = document.querySelectorAll(".jogador-humano");
+const dragMaoCPU = document.querySelectorAll(".jogador-cpu");
+
+if(!vezCPU){
+  dragMaoHumano.forEach(draggable => {
+    draggable.addEventListener('dragstart', ()=>{
+      draggable.classList.add('.dragging')
+    })
+
+    draggable.addEventListener('dragend', ()=>{
+      draggable.classList.remove('dragging')
+    })
+  })
+}else{
+  dragMaoCPU.forEach(draggable => {
+    draggable.addEventListener('dragstart', ()=>{
+      
+    })
+  })
 }
