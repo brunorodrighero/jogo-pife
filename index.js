@@ -95,6 +95,7 @@ function novoJogo() {
     virouCartaCPU = true;
   }
   vezDeQuem();
+  dragFunction();
 }
 
 function embaralharCartas() {
@@ -123,14 +124,15 @@ function novaCarta() {
   cartaRetirada = cartasEmbaralhadas[contadorBaralho];
   contadorBaralho++;
   if (cartaRetirada == undefined) return;
-  removeCartaRetirada();
   if (!vezCPU && podeVirarCartaHumano) {
+    removeCartaRetirada();
     criarCartaRetirada(cartaRetirada);
     podeVirarCartaHumano = false;
     virouCartaHumano = true;
     virouCartaCPU = false;
   }
   if (vezCPU && podeVirarCartaCPU) {
+    removeCartaRetirada();
     criarCartaRetirada(cartaRetirada);
     podeVirarCartaCPU = false;
     virouCartaCPU = true;
@@ -155,6 +157,7 @@ function aceitarCarta(idCarta) {
   if (maoHumano > 9 || maoCPU > 9) return;
   adicionarCartaMao(idCarta);
   removeCartaRetirada();
+  dragFunction();
 }
 
 function adicionarCartaMao(idCarta) {
@@ -167,19 +170,24 @@ function adicionarCartaMao(idCarta) {
   carta.setAttribute("onClick", `devolverCarta('${idCarta}')`);
 
   if (vezCPU == true) {
+    let container = document.createElement("div");
+    container.setAttribute("class", "container");
     carta.setAttribute("class", "jogador-cpu");
     local = document.querySelector("#mao-cpu");
-    local.appendChild(carta);
+    container.appendChild(carta);
+    local.appendChild(container);
     maoCPU.push(idCarta);
     virouCartaCPU = true;
   } else {
+    let container = document.createElement("div");
+    container.setAttribute("class", "container2");
     carta.setAttribute("class", "jogador-humano");
     local = document.querySelector("#mao-humano");
-    local.appendChild(carta);
+    container.appendChild(carta);
+    local.appendChild(container);
     maoHumano.push(idCarta);
     virouCartaHumano = true;
   }
-  
 }
 
 function removeCartaRetirada() {
@@ -194,6 +202,8 @@ function removeCartasJogadores() {
   document.querySelectorAll(".cartas-cpu").forEach((e) => e.remove());
   document.querySelectorAll(".jogador-humano").forEach((e) => e.remove());
   document.querySelectorAll(".jogador-cpu").forEach((e) => e.remove());
+  document.querySelectorAll(".container").forEach((e) => e.remove());
+  document.querySelectorAll(".container2").forEach((e) => e.remove());
   maoCPU = [];
   maoHumano = [];
 }
@@ -205,8 +215,8 @@ function vezDeQuem() {
 
 function darAsCartas() {
   maoCPU.forEach((e) => {
-    //let container = document.createElement("div");
-    //container.setAttribute("class", "container");
+    let container = document.createElement("div");
+    container.setAttribute("class", "container");
     let img = document.createElement("img");
     img.setAttribute("class", "jogador-cpu");
     img.setAttribute("id", `${e}`);
@@ -214,15 +224,15 @@ function darAsCartas() {
     img.setAttribute("onClick", `devolverCarta('${e}')`);
     img.src = `/imagens/${e}.png`;
     let local = document.querySelector("#mao-cpu");
-    //container.appendChild(img);
-    //local.parentNode.insertBefore(container, local.nextSibling);   
-    local.appendChild(img);
-    //local.appendChild(container);
+    container.appendChild(img);
+    //local.parentNode.insertBefore(container, local.nextSibling);
+    //local.appendChild(img);
+    local.appendChild(container);
   });
 
   maoHumano.forEach((e) => {
-    //let container = document.createElement("div");
-    //container.setAttribute("class", "container2");
+    let container2 = document.createElement("div");
+    container2.setAttribute("class", "container2");
     let img = document.createElement("img");
     img.setAttribute("class", "jogador-humano");
     img.setAttribute("id", `${e}`);
@@ -230,19 +240,23 @@ function darAsCartas() {
     img.setAttribute("onClick", `devolverCarta('${e}')`);
     img.src = `/imagens/${e}.png`;
     let local = document.querySelector("#mao-humano");
-    //container.appendChild(img);
-    //local.parentNode.insertBefore(container, local.nextSibling); 
-    local.appendChild(img);
+    container2.appendChild(img);
+    //local.parentNode.insertBefore(container, local.nextSibling);
+    local.appendChild(container2);
   });
 }
 
 function devolverCarta(idCarta) {
   if (!isPlaying) return;
-  if (!vezCPU && maoHumano.length != 10 || vezCPU && maoCPU.length != 10) return;
+  if ((!vezCPU && maoHumano.length != 10) || (vezCPU && maoCPU.length != 10))
+    return;
   let carta = idCarta.replace("'", "");
   let cartaImg = document.querySelectorAll(`img[src='/imagens/${carta}.png']`);
+
+  cartaImg[0].parentElement.remove();
   let local = document.querySelector(".imagens");
   local.appendChild(cartaImg[0]);
+
   if (vezCPU) {
     maoCPU.splice(maoCPU.indexOf(idCarta), 1);
     local = document.querySelector(".jogador-cpu");
@@ -257,6 +271,8 @@ function devolverCarta(idCarta) {
 }
 
 function terminarJogada() {
+  if (maoHumano.length > 9 || maoCPU.length > 9) return;
+
   if (verificarVitoriaHumano()) {
     document.getElementById("quem-joga").textContent = "Vitória Humano!";
     isPlaying = false;
@@ -402,30 +418,118 @@ function verificaRepeticoesArray(vetor, valor) {
   return contador;
 }
 //fazendo a verificação de vitória quando são cartas sequenciais do mesmo naipe.
-function verificaSequenciasArray(vetor, valor){
+function verificaSequenciasArray(vetor, valor) {
   let contador = 0;
-  let naipe=valor.charAt(1);
+  let naipe = valor.charAt(1);
   vetor.forEach((v) => v.charAt(0) == valor && contador++);
   return contador;
 }
 
-const dragMaoHumano = document.querySelectorAll(".jogador-humano");
-const dragMaoCPU = document.querySelectorAll(".jogador-cpu");
+function dragFunction() {
+  const dragMaoHumano = document.querySelectorAll(".jogador-humano"); //draggable
+  const dragMaoCPU = document.querySelectorAll(".jogador-cpu");
+  let dragged;
+  if (!vezCPU) {
+    dragMaoHumano.forEach((draggable) => {
+      draggable.addEventListener("drag", (e) => {}, false);
 
-if(!vezCPU){
-  dragMaoHumano.forEach(draggable => {
-    draggable.addEventListener('dragstart', ()=>{
-      draggable.classList.add('.dragging')
-    })
+      draggable.addEventListener(
+        "dragstart",
+        (e) => {
+          dragged = e.target;
+          e.target.style.opacity = 0.5;
+        },
+        false
+      );
 
-    draggable.addEventListener('dragend', ()=>{
-      draggable.classList.remove('dragging')
-    })
-  })
-}else{
-  dragMaoCPU.forEach(draggable => {
-    draggable.addEventListener('dragstart', ()=>{
-      
-    })
-  })
+      draggable.addEventListener(
+        "dragend",
+        (e) => {
+          e.target.style.opacity = "";
+        },
+        false
+      );
+
+      draggable.addEventListener(
+        "dragover",
+        (e) => {
+          e.preventDefault();
+        },
+        false
+      );
+
+      draggable.addEventListener("dropenter", (e) => {}, false);
+
+      draggable.addEventListener("dropleave", (e) => {}, false);
+
+      draggable.addEventListener(
+        "drop",
+        (e) => {
+          e.preventDefault();
+          if(dragged.id!=undefined) {
+            if (e.target.className == "jogador-humano") {
+              let carta = document.getElementById(e.target.id); //carta a ser removida e substituida
+              let carta2 = document.getElementById(dragged.id); //carta sendo movida
+              let localCarta = carta.parentNode;
+              let localCarta2 = carta2.parentNode;  
+              localCarta2.appendChild(carta);
+              localCarta.appendChild(carta2);
+            }
+          };          
+        },
+        false
+      );
+    });
+  } else {
+    dragMaoCPU.forEach((draggable) => {
+      draggable.addEventListener("drag", (e) => {}, false);
+
+      draggable.addEventListener(
+        "dragstart",
+        (e) => {
+          dragged = e.target;
+          e.target.style.opacity = 0.5;
+        },
+        false
+      );
+
+      draggable.addEventListener(
+        "dragend",
+        (e) => {
+          e.target.style.opacity = "";
+        },
+        false
+      );
+
+      draggable.addEventListener(
+        "dragover",
+        (e) => {
+          e.preventDefault();
+        },
+        false
+      );
+
+      draggable.addEventListener("dropenter", (e) => {}, false);
+
+      draggable.addEventListener("dropleave", (e) => {}, false);
+
+      draggable.addEventListener(
+        "drop",
+        (e) => {
+          e.preventDefault();
+          if(dragged.id!=undefined) {
+            if (e.target.className == "jogador-cpu") {
+              let carta = document.getElementById(e.target.id); //carta a ser removida e substituida
+              let carta2 = document.getElementById(dragged.id); //carta sendo movida
+              let localCarta = carta.parentNode;
+              let localCarta2 = carta2.parentNode;  
+              localCarta2.appendChild(carta);
+              localCarta.appendChild(carta2);
+            }
+          };          
+        },
+        false
+      );
+    });
+  }
 }
