@@ -120,10 +120,14 @@ function darCartasInicio() {
 
 function novaCarta() {
   if (!isPlaying) return;
+  if(maoCPU.length>9) return;
+  if(maoHumano.length>9) return;
+  
   if (contadorBaralho > 52) contadorBaralho = 0;
   cartaRetirada = cartasEmbaralhadas[contadorBaralho];
   contadorBaralho++;
   if (cartaRetirada == undefined) return;
+  
   if (!vezCPU && podeVirarCartaHumano) {
     removeCartaRetirada();
     criarCartaRetirada(cartaRetirada);
@@ -138,6 +142,7 @@ function novaCarta() {
     virouCartaCPU = true;
     virouCartaHumano = false;
   }
+  dragFunction();
 }
 
 function criarCartaRetirada(cartaRetirada) {
@@ -273,12 +278,12 @@ function devolverCarta(idCarta) {
 function terminarJogada() {
   if (maoHumano.length > 9 || maoCPU.length > 9) return;
 
-  if (verificarVitoriaHumano()) {
+  if (verificarVitoria(maoHumano)) {
     document.getElementById("quem-joga").textContent = "Vitória Humano!";
     isPlaying = false;
     return;
   }
-  if (verificarVitoriaCPU()) {
+  if (verificarVitoria(maoCPU)) {
     document.getElementById("quem-joga").textContent = "Vitória CPU!";
     isPlaying = false;
     return;
@@ -301,95 +306,57 @@ function terminarJogada() {
   vezDeQuem();
 }
 
-function verificarVitoriaHumano() {
-  let isTrioDeCartasIguais = 0;
-  let cartaVerificada = [];
-  let repeticoes = 0;
-  if (maoHumano.length == 9) {
-    for (let i = 0; i < maoHumano.length; i++) {
-      if (!cartaVerificada.includes(maoHumano[i])) {
-        cartaVerificada.push(maoHumano[i]);
-        if (startsWithNumber(maoHumano[i])) {
-          repeticoes = verificaRepeticoesArray(
-            maoHumano,
-            maoHumano[i].charAt(0)
-          );
-          if (repeticoes >= 3) {
-            isTrioDeCartasIguais++;
-          }
-          repeticoes = 0;
-        } else if (
-          !startsWithNumber(maoHumano[i]) &&
-          maoHumano[i].charAt(0) != undefined
-        ) {
-          switch (maoHumano[i].charAt(0)) {
-            case "J":
-              repeticoes = verificaRepeticoesArray(maoHumano, "J");
-              if (repeticoes >= 3) {
-                isTrioDeCartasIguais++;
-              }
-              repeticoes = 0;
-              break;
-            case "Q":
-              repeticoes = verificaRepeticoesArray(maoHumano, "Q");
-              if (repeticoes >= 3) {
-                isTrioDeCartasIguais++;
-              }
-              repeticoes = 0;
-              break;
-            case "K":
-              repeticoes = verificaRepeticoesArray(maoHumano, "K");
-              if (repeticoes >= 3) {
-                isTrioDeCartasIguais++;
-              }
-              repeticoes = 0;
-              break;
-          }
-          repeticoes = 0;
-        }
-      }
-      repeticoes = 0;
-    }
-  }
+function verificarVitoria(vetorMaoJogador) {
+  let isTrioDeCartasIguais = analisaMao(vetorMaoJogador);
+  let valor=verificaSequenciasArray(vetorMaoJogador);
+  if(valor>=3) return true;
+  if(valor<3) isTrioDeCartasIguais+=valor*3;
   if (isTrioDeCartasIguais >= 9) return true;
   return false;
 }
 
-function verificarVitoriaCPU() {
-  let isTrioDeCartasIguais = 0;
+function analisaMao(vetor) {
+  let repeticoes;
   let cartaVerificada = [];
-  let repeticoes = 0;
-  if (maoCPU.length == 9) {
-    for (let i = 0; i < maoCPU.length; i++) {
-      if (!cartaVerificada.includes(maoCPU[i])) {
-        cartaVerificada.push(maoCPU[i]);
-        if (startsWithNumber(maoCPU[i])) {
-          repeticoes = verificaRepeticoesArray(maoCPU, maoCPU[i].charAt(0));
+  let isTrioDeCartasIguais;
+  if (vetor.length >= 9) {
+    for (let i = 0; i < vetor.length; i++) {
+      if (!cartaVerificada.includes(vetor[i])) {
+        cartaVerificada.push(vetor[i]);
+        if (startsWithNumber(vetor[i])) {
+          repeticoes = verificaRepeticoesArray(vetor, vetor[i].charAt(0));
           if (repeticoes >= 3) {
             isTrioDeCartasIguais++;
           }
           repeticoes = 0;
         } else if (
-          !startsWithNumber(maoCPU[i]) &&
-          maoCPU[i].charAt(0) != undefined
+          !startsWithNumber(vetor[i]) &&
+          vetor[i].charAt(0) != undefined
         ) {
-          switch (maoCPU[i].charAt(0)) {
+          switch (vetor[i].charAt(0)) {
             case "J":
-              repeticoes = verificaRepeticoesArray(maoCPU, "J");
+              repeticoes = verificaRepeticoesArray(vetor, "J");
               if (repeticoes >= 3) {
                 isTrioDeCartasIguais++;
               }
               repeticoes = 0;
               break;
             case "Q":
-              repeticoes = verificaRepeticoesArray(maoCPU, "Q");
+              repeticoes = verificaRepeticoesArray(vetor, "Q");
               if (repeticoes >= 3) {
                 isTrioDeCartasIguais++;
               }
               repeticoes = 0;
               break;
             case "K":
-              repeticoes = verificaRepeticoesArray(maoCPU, "K");
+              repeticoes = verificaRepeticoesArray(vetor, "K");
+              if (repeticoes >= 3) {
+                isTrioDeCartasIguais++;
+              }
+              repeticoes = 0;
+              break;
+            case "A":
+              repeticoes = verificaRepeticoesArray(vetor, "A");
               if (repeticoes >= 3) {
                 isTrioDeCartasIguais++;
               }
@@ -402,8 +369,7 @@ function verificarVitoriaCPU() {
       repeticoes = 0;
     }
   }
-  if (isTrioDeCartasIguais >= 9) return true;
-  return false;
+  return isTrioDeCartasIguais;
 }
 
 function startsWithNumber(strg) {
@@ -418,11 +384,102 @@ function verificaRepeticoesArray(vetor, valor) {
   return contador;
 }
 //fazendo a verificação de vitória quando são cartas sequenciais do mesmo naipe.
-function verificaSequenciasArray(vetor, valor) {
-  let contador = 0;
-  let naipe = valor.charAt(1);
-  vetor.forEach((v) => v.charAt(0) == valor && contador++);
-  return contador;
+function verificaSequenciasArray(vetor) {
+  let pares=0;
+  let novaCarta;
+  let novoVetor=[];
+  let vertorNaipeC = [];
+  let vertorNaipeD = [];
+  let vertorNaipeH = [];
+  let vertorNaipeS = [];
+  console.log(vetor);
+  vetor.forEach((v) => {
+    switch (v.substr(0,1)) {
+      case "A":
+        novaCarta = "1"+v.substr(1,1);
+        novoVetor.push(novaCarta);
+        novaCarta="";
+        break;
+      case "J":
+        novaCarta = "11"+v.substr(1,1);
+        novoVetor.push(novaCarta);
+        novaCarta="";
+        break;
+      case "Q":
+        novaCarta = "12"+v.substr(1,1);
+        novoVetor.push(novaCarta);
+        novaCarta="";
+        break;
+      case "K":
+        novaCarta = "13"+v.substr(1,1);
+        novoVetor.push(novaCarta);
+        novaCarta="";
+        break;
+    }
+    if(startsWithNumber(v.substr(0,1))){
+      novoVetor.push(v);
+    }
+  });
+  console.table(novoVetor);
+  //divide o vetor inicial em vetores separados por naipes e remove o naipe.
+  novoVetor.forEach((v) => {
+    if(startsWithNumber(v.charAt(1))){
+      switch (v.charAt(2)) {
+        case "C":
+          vertorNaipeC.push(parseInt(v.substr(0,2)));
+          break;
+        case "D":
+          vertorNaipeD.push(parseInt(v.substr(0,2)));
+          break;
+        case "H":
+          vertorNaipeH.push(parseInt(v.substr(0,2)));
+          break;
+        case "S":
+          vertorNaipeS.push(parseInt(v.substr(0,2)));
+          break;
+      }
+    }else{
+      switch (v.charAt(1)) {
+        case "C":
+          vertorNaipeC.push(parseInt(v.substr(0,1)));
+          break;
+        case "D":
+          vertorNaipeD.push(parseInt(v.substr(0,1)));
+          break;
+        case "H":
+          vertorNaipeH.push(parseInt(v.substr(0,1)));
+          break;
+        case "S":
+          vertorNaipeS.push(parseInt(v.substr(0,1)));
+          break;
+      }
+    }    
+  });
+  vertorNaipeC.sort((a, b) => a - b);
+  vertorNaipeD.sort((a, b) => a - b);
+  vertorNaipeH.sort((a, b) => a - b);
+  vertorNaipeS.sort((a, b) => a - b);
+
+  pares += contarParesNaipeIgual(vertorNaipeC);
+  pares += contarParesNaipeIgual(vertorNaipeD);
+  pares += contarParesNaipeIgual(vertorNaipeH);
+  pares += contarParesNaipeIgual(vertorNaipeS);
+  return pares;
+}
+
+function contarParesNaipeIgual(vetor) {
+  let contador = 1;
+  let pares = 0;
+  vetor.forEach((v) => {
+    if (vetor.includes(v + 1)) {
+      contador++;
+      if (contador == 3) {
+        pares++;
+        contador = 1;
+      }
+    }
+  });
+  return pares;
 }
 
 function dragFunction() {
@@ -466,16 +523,16 @@ function dragFunction() {
         "drop",
         (e) => {
           e.preventDefault();
-          if(dragged.id!=undefined) {
+          if (dragged!=undefined && dragged.id != undefined ) {
             if (e.target.className == "jogador-humano") {
               let carta = document.getElementById(e.target.id); //carta a ser removida e substituida
               let carta2 = document.getElementById(dragged.id); //carta sendo movida
               let localCarta = carta.parentNode;
-              let localCarta2 = carta2.parentNode;  
+              let localCarta2 = carta2.parentNode;
               localCarta2.appendChild(carta);
               localCarta.appendChild(carta2);
             }
-          };          
+          }
         },
         false
       );
@@ -517,16 +574,16 @@ function dragFunction() {
         "drop",
         (e) => {
           e.preventDefault();
-          if(dragged.id!=undefined) {
+          if (dragged!=undefined && dragged.id != undefined) {
             if (e.target.className == "jogador-cpu") {
               let carta = document.getElementById(e.target.id); //carta a ser removida e substituida
               let carta2 = document.getElementById(dragged.id); //carta sendo movida
               let localCarta = carta.parentNode;
-              let localCarta2 = carta2.parentNode;  
+              let localCarta2 = carta2.parentNode;
               localCarta2.appendChild(carta);
               localCarta.appendChild(carta2);
             }
-          };          
+          }
         },
         false
       );
