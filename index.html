@@ -11,22 +11,22 @@
 <body>
     <div id="titulo">Jogo Pife!</div>
     <div class="logo">
-        <img id="logo" src="/imagens/aces.png" alt="Imagens Cartas">
+        <img id="logo" src="/imagens/aces.png" alt="">
     </div>
-    <div class="imagens">
-        <img id="deck-cartas" onclick="novaCarta()" src="/imagens/deckofcards.png" alt="Deck de Cartas">
-    </div>
-    <div id="jogador-cpu">Cartas CPU: </div>
-    <div id="mao-cpu"></div>
-    <div id="jogador-humano">Cartas Humano:</div>
-    <div id="mao-humano"></div>
-    <div id="quem-joga"></div>
-    <div class="botoes">
-        <button onclick="novaCarta()">Nova Carta</button>
-        <button onclick="terminarJogada()">Terminar Jogada</button>
-        <button onclick="novoJogo()">Novo Jogo</button>
-    </div>
-    
-    
+    <main>
+        <div class="imagens">
+            <img id="deck-cartas" role="button" onclick="novaCarta()" src="/imagens/deckofcards.png" alt="Botão para tirar uma nova carta">
+        </div>
+        <div id="jogador-cpu">Cartas CPU: </div>
+        <div id="mao-cpu"></div>
+        <div id="jogador-humano">Cartas Humano:</div>
+        <div id="mao-humano"></div>
+        <div id="quem-joga"></div>
+        <div class="botoes">
+            <button onclick="novaCarta()">Nova Carta</button>
+            <button onclick="terminarJogada()">Terminar Jogada</button>
+            <button onclick="novoJogo()">Novo Jogo</button>
+        </div>
+    </main>
 </body>
 </html>
