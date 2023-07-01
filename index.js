@@ -55,7 +55,7 @@ const deckCartas = [
 
 window.addEventListener("load", novoJogo);
 
-let cartasEmbaralhadas = deckCartas;
+let cartasEmbaralhadas = [...deckCartas];
 let maoCPU = [];
 let maoHumano = [];
 let contadorBaralho = 0;
@@ -77,23 +77,15 @@ function novoJogo() {
   isPlaying = true;
   darCartasInicio();
   darAsCartas();
-  if (!vezCPU) {
-    vezCPU = true;
-    podeVirarCartaCPU = true;
-    podeVirarCartaHumano = false;
-    cpuTerminou = false;
-    humanoTerminou = true;
-    virouCartaHumano = true;
-    virouCartaCPU = false;
-  } else {
-    vezCPU = false;
-    podeVirarCartaCPU = false;
-    podeVirarCartaHumano = true;
-    cpuTerminou = true;
-    humanoTerminou = false;
-    virouCartaHumano = false;
-    virouCartaCPU = true;
-  }
+
+  vezCPU = !vezCPU;
+  podeVirarCartaCPU = vezCPU;
+  podeVirarCartaHumano = !vezCPU;
+  cpuTerminou = !vezCPU;
+  humanoTerminou = vezCPU;
+  virouCartaHumano = vezCPU;
+  virouCartaCPU = !vezCPU;
+  
   vezDeQuem();
   dragFunction();
 }
@@ -120,14 +112,13 @@ function darCartasInicio() {
 
 function novaCarta() {
   if (!isPlaying) return;
-  if(maoCPU.length>9) return;
-  if(maoHumano.length>9) return;
-  
+  if (maoCPU.length > 9 || maoHumano.length > 9) return;
+
   if (contadorBaralho > 52) contadorBaralho = 0;
   cartaRetirada = cartasEmbaralhadas[contadorBaralho];
   contadorBaralho++;
   if (cartaRetirada == undefined) return;
-  
+
   if (!vezCPU && podeVirarCartaHumano) {
     removeCartaRetirada();
     criarCartaRetirada(cartaRetirada);
@@ -145,6 +136,7 @@ function novaCarta() {
   dragFunction();
 }
 
+
 function criarCartaRetirada(cartaRetirada) {
   let img = document.createElement("img");
   img.setAttribute("id", `${cartaRetirada}`);
@@ -159,14 +151,13 @@ function criarCartaRetirada(cartaRetirada) {
 function aceitarCarta(idCarta) {
   if (!isPlaying) return;
   if (cartaRetirada == undefined) return;
-  if (maoHumano > 9 || maoCPU > 9) return;
+  if (maoHumano.length > 9 || maoCPU.length > 9) return;
   adicionarCartaMao(idCarta);
   removeCartaRetirada();
   dragFunction();
 }
 
 function adicionarCartaMao(idCarta) {
-  if (idCarta == undefined) return;
   let carta;
   let local;
   carta = document.querySelector(".carta-retirada");
@@ -183,15 +174,20 @@ function adicionarCartaMao(idCarta) {
     local.appendChild(container);
     maoCPU.push(idCarta);
     virouCartaCPU = true;
-  } else {
+    vezCPU = false;
+    vezDeQuem();
+  }
+  if (vezCPU == false) {
     let container = document.createElement("div");
-    container.setAttribute("class", "container2");
+    container.setAttribute("class", "container");
     carta.setAttribute("class", "jogador-humano");
     local = document.querySelector("#mao-humano");
     container.appendChild(carta);
     local.appendChild(container);
     maoHumano.push(idCarta);
     virouCartaHumano = true;
+    vezCPU = true;
+    vezDeQuem();
   }
 }
 
@@ -253,26 +249,32 @@ function darAsCartas() {
 
 function devolverCarta(idCarta) {
   if (!isPlaying) return;
-  if ((!vezCPU && maoHumano.length != 10) || (vezCPU && maoCPU.length != 10))
-    return;
-  let carta = idCarta.replace("'", "");
-  let cartaImg = document.querySelectorAll(`img[src='/imagens/${carta}.png']`);
+  if ((!vezCPU && maoHumano.length !== 10) || (vezCPU && maoCPU.length !== 10)) return;
 
-  cartaImg[0].parentElement.remove();
-  let local = document.querySelector(".imagens");
-  local.appendChild(cartaImg[0]);
-
-  if (vezCPU) {
-    maoCPU.splice(maoCPU.indexOf(idCarta), 1);
-    local = document.querySelector(".jogador-cpu");
+  let local, carta, cartaRetirada, index;
+  if (!vezCPU) {
+    local = document.querySelector("#mao-humano");
+    carta = local.querySelector(`[onclick="devolverCarta('${idCarta}')"]`);
+    index = maoHumano.indexOf(idCarta);
+    maoHumano.splice(index, 1);
   } else {
-    maoHumano.splice(maoHumano.indexOf(idCarta), 1);
-    local = document.querySelector(".jogador-humano");
+    local = document.querySelector("#mao-cpu");
+    carta = local.querySelector(`[onclick="devolverCarta('${idCarta}')"]`);
+    index = maoCPU.indexOf(idCarta);
+    maoCPU.splice(index, 1);
   }
-  local.setAttribute("onClick", `aceitarCarta('${carta}')`);
-  local.setAttribute("class", "carta-retirada");
-  local.setAttribute("id", `${carta}`);
-  terminarJogada();
+
+  cartaRetirada = carta;
+  cartaRetirada.setAttribute("class", "carta-retirada");
+  cartaRetirada.setAttribute("onClick", `aceitarCarta('${idCarta}')`);
+  cartaRetirada.removeAttribute("onClick", `devolverCarta('${idCarta}')`);
+
+  local = document.querySelector("#mesa-jogo");
+  local.appendChild(cartaRetirada);
+  vezCPU = !vezCPU;
+  podeVirarCartaCPU = vezCPU;
+  podeVirarCartaHumano = !vezCPU;
+  dragFunction();
 }
 
 function terminarJogada() {
@@ -318,7 +320,7 @@ function verificarVitoria(vetorMaoJogador) {
 function analisaMao(vetor) {
   let repeticoes;
   let cartaVerificada = [];
-  let isTrioDeCartasIguais;
+  let isTrioDeCartasIguais = 0;
   if (vetor.length >= 9) {
     for (let i = 0; i < vetor.length; i++) {
       if (!cartaVerificada.includes(vetor[i])) {
@@ -385,86 +387,92 @@ function verificaRepeticoesArray(vetor, valor) {
 }
 //fazendo a verificação de vitória quando são cartas sequenciais do mesmo naipe.
 function verificaSequenciasArray(vetor) {
-  let pares=0;
+  let sequencias = 0;
   let novaCarta;
-  let novoVetor=[];
-  let vertorNaipeC = [];
-  let vertorNaipeD = [];
-  let vertorNaipeH = [];
-  let vertorNaipeS = [];
-  console.log(vetor);
+  let novoVetor = [];
+  let vetorNaipeC = [];
+  let vetorNaipeD = [];
+  let vetorNaipeH = [];
+  let vetorNaipeS = [];
+
   vetor.forEach((v) => {
     switch (v.substr(0,1)) {
       case "A":
-        novaCarta = "1"+v.substr(1,1);
+        novaCarta = "1" + v.substr(1,1);
         novoVetor.push(novaCarta);
-        novaCarta="";
+        novaCarta = "14" + v.substr(1,1);
+        novoVetor.push(novaCarta);
+        novaCarta = "";
         break;
       case "J":
-        novaCarta = "11"+v.substr(1,1);
+        novaCarta = "11" + v.substr(1,1);
         novoVetor.push(novaCarta);
-        novaCarta="";
+        novaCarta = "";
         break;
       case "Q":
-        novaCarta = "12"+v.substr(1,1);
+        novaCarta = "12" + v.substr(1,1);
         novoVetor.push(novaCarta);
-        novaCarta="";
+        novaCarta = "";
         break;
       case "K":
-        novaCarta = "13"+v.substr(1,1);
+        novaCarta = "13" + v.substr(1,1);
         novoVetor.push(novaCarta);
-        novaCarta="";
+        novaCarta = "";
+        break;
+      default:
+        novoVetor.push(v);
+    }
+  });
+
+  novoVetor.forEach((v) => {
+    let naipe = v.charAt(v.length - 1);
+    let valor = parseInt(v.substr(0, v.length - 1));
+    switch (naipe) {
+      case "C":
+        vetorNaipeC.push(valor);
+        break;
+      case "D":
+        vetorNaipeD.push(valor);
+        break;
+      case "H":
+        vetorNaipeH.push(valor);
+        break;
+      case "S":
+        vetorNaipeS.push(valor);
         break;
     }
-    if(startsWithNumber(v.substr(0,1))){
-      novoVetor.push(v);
-    }
   });
-  console.table(novoVetor);
-  //divide o vetor inicial em vetores separados por naipes e remove o naipe.
-  novoVetor.forEach((v) => {
-    if(startsWithNumber(v.charAt(1))){
-      switch (v.charAt(2)) {
-        case "C":
-          vertorNaipeC.push(parseInt(v.substr(0,2)));
-          break;
-        case "D":
-          vertorNaipeD.push(parseInt(v.substr(0,2)));
-          break;
-        case "H":
-          vertorNaipeH.push(parseInt(v.substr(0,2)));
-          break;
-        case "S":
-          vertorNaipeS.push(parseInt(v.substr(0,2)));
-          break;
-      }
-    }else{
-      switch (v.charAt(1)) {
-        case "C":
-          vertorNaipeC.push(parseInt(v.substr(0,1)));
-          break;
-        case "D":
-          vertorNaipeD.push(parseInt(v.substr(0,1)));
-          break;
-        case "H":
-          vertorNaipeH.push(parseInt(v.substr(0,1)));
-          break;
-        case "S":
-          vertorNaipeS.push(parseInt(v.substr(0,1)));
-          break;
-      }
-    }    
-  });
-  vertorNaipeC.sort((a, b) => a - b);
-  vertorNaipeD.sort((a, b) => a - b);
-  vertorNaipeH.sort((a, b) => a - b);
-  vertorNaipeS.sort((a, b) => a - b);
 
-  pares += contarParesNaipeIgual(vertorNaipeC);
-  pares += contarParesNaipeIgual(vertorNaipeD);
-  pares += contarParesNaipeIgual(vertorNaipeH);
-  pares += contarParesNaipeIgual(vertorNaipeS);
-  return pares;
+  vetorNaipeC.sort((a, b) => a - b);
+  vetorNaipeD.sort((a, b) => a - b);
+  vetorNaipeH.sort((a, b) => a - b);
+  vetorNaipeS.sort((a, b) => a - b);
+
+  sequencias += contarSequencias(vetorNaipeC);
+  sequencias += contarSequencias(vetorNaipeD);
+  sequencias += contarSequencias(vetorNaipeH);
+  sequencias += contarSequencias(vetorNaipeS);
+
+  return sequencias;
+}
+
+function contarSequencias(vetor) {
+  let contador = 0;
+  let sequencias = 0;
+
+  for(let i = 0; i < vetor.length - 1; i++) {
+    if(vetor[i + 1] - vetor[i] == 1) {
+      contador++;
+      if(contador >= 2) {
+        sequencias++;
+        contador = 0;
+      }
+    } else {
+      contador = 0;
+    }
+  }
+  
+  return sequencias;
 }
 
 function contarParesNaipeIgual(vetor) {
@@ -482,111 +490,68 @@ function contarParesNaipeIgual(vetor) {
   return pares;
 }
 
+function addDragAndDropEventListeners(draggables, className) {
+  let dragged;
+
+  draggables.forEach((draggable) => {
+    draggable.addEventListener("drag", (e) => {}, false);
+
+    draggable.addEventListener(
+      "dragstart",
+      (e) => {
+        dragged = e.target;
+        e.target.style.opacity = 0.5;
+      },
+      false
+    );
+
+    draggable.addEventListener(
+      "dragend",
+      (e) => {
+        e.target.style.opacity = "";
+      },
+      false
+    );
+
+    draggable.addEventListener(
+      "dragover",
+      (e) => {
+        e.preventDefault();
+      },
+      false
+    );
+
+    draggable.addEventListener("dropenter", (e) => {}, false);
+
+    draggable.addEventListener("dropleave", (e) => {}, false);
+
+    draggable.addEventListener(
+      "drop",
+      (e) => {
+        e.preventDefault();
+        if (dragged!=undefined && dragged.id != undefined) {
+          if (e.target.className == className) {
+            let carta = document.getElementById(e.target.id);
+            let carta2 = document.getElementById(dragged.id);
+            let localCarta = carta.parentNode;
+            let localCarta2 = carta2.parentNode;
+            localCarta2.appendChild(carta);
+            localCarta.appendChild(carta2);
+          }
+        }
+      },
+      false
+    );
+  });
+}
+
 function dragFunction() {
   const dragMaoHumano = document.querySelectorAll(".jogador-humano"); //draggable
   const dragMaoCPU = document.querySelectorAll(".jogador-cpu");
-  let dragged;
+  
   if (!vezCPU) {
-    dragMaoHumano.forEach((draggable) => {
-      draggable.addEventListener("drag", (e) => {}, false);
-
-      draggable.addEventListener(
-        "dragstart",
-        (e) => {
-          dragged = e.target;
-          e.target.style.opacity = 0.5;
-        },
-        false
-      );
-
-      draggable.addEventListener(
-        "dragend",
-        (e) => {
-          e.target.style.opacity = "";
-        },
-        false
-      );
-
-      draggable.addEventListener(
-        "dragover",
-        (e) => {
-          e.preventDefault();
-        },
-        false
-      );
-
-      draggable.addEventListener("dropenter", (e) => {}, false);
-
-      draggable.addEventListener("dropleave", (e) => {}, false);
-
-      draggable.addEventListener(
-        "drop",
-        (e) => {
-          e.preventDefault();
-          if (dragged!=undefined && dragged.id != undefined ) {
-            if (e.target.className == "jogador-humano") {
-              let carta = document.getElementById(e.target.id); //carta a ser removida e substituida
-              let carta2 = document.getElementById(dragged.id); //carta sendo movida
-              let localCarta = carta.parentNode;
-              let localCarta2 = carta2.parentNode;
-              localCarta2.appendChild(carta);
-              localCarta.appendChild(carta2);
-            }
-          }
-        },
-        false
-      );
-    });
+    addDragAndDropEventListeners(dragMaoHumano, "jogador-humano");
   } else {
-    dragMaoCPU.forEach((draggable) => {
-      draggable.addEventListener("drag", (e) => {}, false);
-
-      draggable.addEventListener(
-        "dragstart",
-        (e) => {
-          dragged = e.target;
-          e.target.style.opacity = 0.5;
-        },
-        false
-      );
-
-      draggable.addEventListener(
-        "dragend",
-        (e) => {
-          e.target.style.opacity = "";
-        },
-        false
-      );
-
-      draggable.addEventListener(
-        "dragover",
-        (e) => {
-          e.preventDefault();
-        },
-        false
-      );
-
-      draggable.addEventListener("dropenter", (e) => {}, false);
-
-      draggable.addEventListener("dropleave", (e) => {}, false);
-
-      draggable.addEventListener(
-        "drop",
-        (e) => {
-          e.preventDefault();
-          if (dragged!=undefined && dragged.id != undefined) {
-            if (e.target.className == "jogador-cpu") {
-              let carta = document.getElementById(e.target.id); //carta a ser removida e substituida
-              let carta2 = document.getElementById(dragged.id); //carta sendo movida
-              let localCarta = carta.parentNode;
-              let localCarta2 = carta2.parentNode;
-              localCarta2.appendChild(carta);
-              localCarta.appendChild(carta2);
-            }
-          }
-        },
-        false
-      );
-    });
+    addDragAndDropEventListeners(dragMaoCPU, "jogador-cpu");
   }
 }
