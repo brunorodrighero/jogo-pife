@@ -1,13 +1,15 @@
 body {
-  background-image: url(/imagens/blackjackTable.jpeg);
+  background-image: url(./imagens/blackjackTable.jpeg);
   background-size: cover;
+  font-family: "Operator Mono", Menlo, Monaco, "Courier New", monospace;
+  margin: 0;
+  padding: 20px;
 }
 
 #titulo {
   text-align: center;
   color: white;
-  font-size: 6vw;
-  font-family: Operator Mono, Menlo, Monaco, 'Courier New', monospace;
+  font-size: 3rem;
   font-weight: bold;
   margin-bottom: 20px;
 }
@@ -17,16 +19,13 @@ button {
   border: none;
   text-align: center;
   display: inline-block;
-  font-size: 2vw;
-  font-family: Operator Mono, Menlo, Monaco, 'Courier New', monospace;
+  font-size: 1.5rem;
   font-weight: bold;
   color: white;
-  width: 100%;
-  margin-left: 30%;
-  margin-right: 30%;
-  margin-top: 15px;
+  width: 40%;
+  margin: 15px auto;
   border-radius: 3px;
-  padding: 10px 30px;
+  padding: 10px 20px;
   background-color: goldenrod;
 }
 
@@ -36,61 +35,43 @@ button:hover {
 }
 
 .botoes {
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -ms-flex-wrap: wrap;
-      flex-wrap: wrap;
-  -ms-flex-line-pack: distribute;
-      align-content: space-around;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
+  flex-wrap: wrap;
+  align-content: space-around;
+  justify-content: center;
 }
 
 #logo {
-  max-width: 30%;
+  max-width: 20%;
 }
 
 .imagens, .logo {
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
+  justify-content: center;
+  align-items: center;
   margin-bottom: 30px;
 }
 
 #deck-cartas {
-  max-width: 15%;
+  max-width: 10%;
   cursor: pointer;
 }
 
 #quem-joga {
   display: inline-block;
   text-align: center;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
   color: white;
-  font-size: 2vw;
-  font-family: Operator Mono, Menlo, Monaco, 'Courier New', monospace;
+  font-size: 1.5rem;
   font-weight: bold;
   margin-bottom: 20px;
   width: 100%;
 }
 
 #mao-humano, #mao-cpu {
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-orient: horizontal;
-  -webkit-box-direction: normal;
-      -ms-flex-direction: row;
-          flex-direction: row;
-  -ms-flex-wrap: wrap;
-      flex-wrap: wrap;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 #mao-humano img, #mao-cpu img {
@@ -100,15 +81,19 @@ button:hover {
 }
 
 .carta-retirada {
-  max-width: 13%;
+  max-width: 12%;
   cursor: pointer;
+  position: relative;
+  z-index: 10;
 }
 
 #jogador-cpu, #jogador-humano {
   display: inline-block;
-  font-family: Operator Mono, Menlo, Monaco, 'Courier New', monospace;
+  text-align: center;
   color: white;
-  font-size: 2vw;
+  font-size: 1.5rem;
+  font-weight: bold;
   width: 100%;
 }
+
 /*# sourceMappingURL=styles.css.map */
